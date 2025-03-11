@@ -1,6 +1,8 @@
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_audio.h>
+
 #include <SDL3_image\SDL_image.h>
 
 #include "header\config.h"
@@ -41,6 +43,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Quit();
         
     }
+
+    
    /* if (!Platforms::InitializeTextures(renderer)) {
         SDL_Log("Failed to initialize textures");
         SDL_DestroyRenderer(renderer);
@@ -116,29 +120,30 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     SDL_RenderTexture(renderer, BackGroundTexture::BackgrounTex, NULL, &background_position);
     SDL_RenderTexture(renderer, BackGroundTexture::MidlegroundTex, NULL, &background_position);
         // Floor
-    //SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, 64.0f, 64.0f };
-    //SDL_RenderTexture(renderer, BackGroundTexture::GroundTex, NULL, &platformFloor);
-    //    // Platforms
+    SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, 64.0f, 64.0f };
+    SDL_RenderTexture(renderer, BackGroundTexture::GroundTex, NULL, &platformFloor);
+        // Platforms
         
         // Player
     SDL_FRect  playerSprite = { position.x, position.y, 37, 87 };
     //SDL_SetTextureScaleMode(playerTex, SDL_SCALEMODE_NEAREST); // dose not seem to have any impact
     animation.animatePlayer(renderer, playerSprite, flip);
-        // collition     
-    //if (SDL_HasRectIntersectionFloat(&playerSprite, &platformFloor)) {
-    //    if (playerSprite.y + 79 <= platformFloor.y) {
-    //        // The player is landing on top of the platform
-    //        playerVelocity.y = platformFloor.y - playerSprite.h; // Adjust player position
-    //        playerVelocity.y = 0;
-    //        isOnGround = true; // player is on the ground
-    //    }
-    //    else {
-    //        isOnGround = false; //player is airborne 
-    //    }
-    //    std::cout << "Contact is " << isOnGround << std::endl;
-    //}
-   
+        // Collition     
+    if (SDL_HasRectIntersectionFloat(&playerSprite, &platformFloor)) {
+        if (playerSprite.y + 79 <= platformFloor.y) {
+            // The player is landing on top of the platform
+            playerVelocity.y = platformFloor.y - playerSprite.h; // Adjust player position
+            playerVelocity.y = 0;
+            isOnGround = true; // player is on the ground
+        }
+        else {
+            isOnGround = false; //player is airborne 
+        }
+        std::cout << "Contact is " << isOnGround << std::endl;
+    }
 
+        //################################################ Sound ################################################
+        // Can't get Sound to work at the moment
         //################################################ Enemies ################################################
     std::string enemies_Type = "black"; // select the blck Helicopter
     std::string folderPath = "assets/helicopter/" + enemies_Type;   
