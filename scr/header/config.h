@@ -8,6 +8,9 @@
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 
+//int SCR_WIDTH = 1200;
+//int SCR_HEIGHT = 600;
+
 static SDL_FlipMode flip = SDL_FLIP_NONE; // Keep track of the current flip state
 
 const bool* Keyboard_state = SDL_GetKeyboardState(NULL); // keyboard input

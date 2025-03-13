@@ -7,10 +7,16 @@
 //static SDL_Texture* playerTex;
 std::string player_Animation_Type;
 
-struct Position {
-	float x, y;
+struct Player {
+    float x, y;
+    float width, height;
+    bool isOnGround;
 };
-Position position = { 15, 500 }; // Start position on top of the floor
+Player player = { 15, 500, 37, 87, false }; // Start position on top of the floor
+//struct Position {
+//	float x, y;
+//};
+//Position position = { 15, 500 }; // Start position on top of the floor
 //SDL_FRect sprite_portion = { 0, 0, 27, 87 };
 
 // Gravity and jump setup
@@ -26,7 +32,7 @@ void handleJump(bool Keyboard_State) {
 
         // Trigger jump
         playerVelocity.y = jumpForce;     // Apply upward velocity
-        position.x += forceForward;      // Apply forward movement if moving
+        player.x += forceForward;      // Apply forward movement if moving
         isOnGround = false;              // Set player as airborne
         std::cout << "Jump initiated. Animation state: 4" << std::endl;
         // Set animation state
@@ -36,11 +42,11 @@ void handleJump(bool Keyboard_State) {
     // Apply gravity while player is airborne
     if (!isOnGround) {
         playerVelocity.y += gravity;     // Apply downward force (gravity)
-        position.y += playerVelocity.y;  // Update player's vertical position
+        player.y += playerVelocity.y;  // Update player's vertical position
 
         // Check if player has landed (ground collision logic)
-        if (position.y >= 500) {         // Assuming 500 is the ground level
-            position.y = 500;            // Reset to ground level
+        if (player.y >= 500) {         // Assuming 500 is the ground level
+            player.y = 600;            // Reset to ground level
             playerVelocity.y = 0;        // Stop vertical movement
             isOnGround = true;           // Mark as grounded
             std::cout << "Player has landed." << std::endl;
