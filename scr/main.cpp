@@ -1,8 +1,11 @@
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL.h>
-
 #include <SDL3_image\SDL_image.h>
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_sdl3.h>
+#include "imgui/imgui_impl_sdlrenderer3.h"
 
 #include "header\config.h"
 #include "header\scene.h"
@@ -15,8 +18,12 @@
 #include <iostream>
 
 // ##################################### Start here Platformer Game ##########################################
-static SDL_Window* window = NULL;
+//static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
+SDL_Window* window = NULL;
+
+static bool show_demo_window = true;
+
 
 // Sound
 static SDL_AudioStream* stream = NULL;
@@ -27,6 +34,23 @@ Animation animation;
 EnemiesAnimation enemies_animation;
 SDL_FRect camera = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
 SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
+
+// ################################## Setup Dear ImGui context ##########################################
+auto init_imgui(SDL_Window* window, SDL_Renderer* renderer) -> auto {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer3_Init(renderer);
+
+}
   
 // This function runs once at startup. 
     SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -44,6 +68,8 @@ SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
             SDL_Log("Coulden't make a window: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
+
+		// Initialize PNG loading
         setWindowIcon(window, "icon.bmp"); // set the window icon must be a .bmp
 
        // Load the .wav file from wherever the app is being run from. 
@@ -72,7 +98,9 @@ SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
 
         // SDL_OpenAudioDeviceStream starts the device paused. You have to tell it to start! 
         SDL_ResumeAudioStreamDevice(stream);
-   
+
+        init_imgui(window, renderer);
+
         return SDL_APP_CONTINUE;
     }
 
@@ -80,6 +108,8 @@ SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
     
+    ImGui_ImplSDL3_ProcessEvent(event);
+
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;
     }    
@@ -127,18 +157,18 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         appState.animation_State = 3; // Set to Death 
         std::cout << "Little green man dying " << appState.animation_State << std::endl;
     }
-    
+        
     return SDL_APP_CONTINUE;
 }
-
+/* This function runs once per frame, and should contain your main loop code. */
 SDL_AppResult SDL_AppIterate(void* appstate) {
     Uint32 startTime = SDL_GetTicks();
     static int previous_State; // Keep track of the previous state
     // Sound
-    if (SDL_GetAudioStreamQueued(stream) < (int)wav_data_len) {
-        /* feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data. */
-        SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
-    }
+    //if (SDL_GetAudioStreamQueued(stream) < (int)wav_data_len) {
+    //    /* feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data. */
+    //    SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
+    //}
    
     handleJump(Keyboard_state);
  
@@ -238,11 +268,35 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
     // Update position
     enemie_sprite_position.x = enemiePosition.x;
+    // ##########################################  ImGui window ######################################
+    // Start the ImGui frame
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    // ImGui demo window (show your own widgets here!)
+    ImGui::ShowDemoWindow(&show_demo_window);
+
+    // Example custom window
+    ImGui::Begin("Game Controls");
+    ImGui::Text("Player X: %.2f", player.x);
+    ImGui::Text("Player Y: %.2f", player.y);
+    if (ImGui::Button("Jump")) {
+        // Trigger your jump logic
+    }
+    ImGui::End();
+
+	// ########################################## End ImGui window ######################################
 
     // Render with the updated position and flip state
     SDL_RenderTextureRotated(renderer, enemieTex, NULL, &enemie_sprite_position, 0, NULL, enemieflip);
     enemies_animation.animateEnemies(renderer, enemie_sprite_position, enemieflip);
-     
+    
+    // ImGui Render
+    ImGui::Render();
+
+    //SDL_RenderClear(renderer);
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
     SDL_RenderPresent(renderer);
     
     Uint32 endTime = SDL_GetTicks();
@@ -257,7 +311,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 /* This function runs once at shutdown. */
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
-
+	ImGui_ImplSDLRenderer3_Shutdown();
     SDL_free(wav_data); // sound
     GameTexture::CleanupTextures();
     SDL_DestroyRenderer(renderer);
@@ -266,31 +320,6 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 
     SDL_free(appstate); // this just fees any memory we have used 
     /* SDL will clean up the window/renderer for us, and then we can go to bed */
+ 
 }
 
-// ###################################### End ##########################################
-
-
-//    // Floor
-    //for (const auto& platform : platforminfo) {
-    //    SDL_FRect rect = { static_cast<int>(platform.x), static_cast<int>(platform.y),
-    //                     static_cast<int>(platform.width), static_cast<int>(platform.height) };
-    //    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
-    //    //SDL_RenderFillRect(renderer, &rect);
-    //    SDL_RenderTexture(renderer, GameTexture::GroundTex, NULL, &rect);
-    //}
-    //// objects Rocks
-    //for (const auto& object : objectinfo) {
-    //    SDL_FRect rect = { static_cast<int>(object.x), static_cast<int>(object.y),
-    //                     static_cast<int>(object.width), static_cast<int>(object.height) };
-    //    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
-    //    //SDL_RenderFillRect(renderer, &rect);
-    //    SDL_RenderTexture(renderer, GameTexture::ObjectTexRock, NULL, &rect);
-    //}
-
-
-
-   // SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, 64.0f, 64.0f };
-   // SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, platforminfo.width, platforminfo.height};
-    //SDL_RenderTexture(renderer, GameTexture::GroundTex, NULL, &platformFloor);
-        // Platforms

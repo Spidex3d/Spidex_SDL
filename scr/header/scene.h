@@ -17,20 +17,24 @@ struct PlatformInfo {
     float width, height;
     
 };
-
+// Add blocks to make a floor
 std::vector<PlatformInfo> platforminfo = {
-    {10, 580, 64, 64},  // Example platform
+	{10, 580, 64, 64},  // Example platform blocks to make a floor
+	{44, 580, 64, 64},
     {78, 580, 64, 64},
     {160, 580, 64, 64},
-    {224, 516, 64, 64}
+    {224, 516, 64, 64},
+    {290, 580, 64, 64}
 };
 
 struct ObjectInfo {
     float x, y;
     float width, height;
 };
+
+// draw som rocks
 std::vector<ObjectInfo> objectinfo = {
-    {10, 516, 64, 64},  // Example Object
+    {10, 516, 64, 64},  // Example Objects rocks
     {224, 452, 64, 64}
 };
 

@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Venders\SDL\include;$(SolutionDir)Venders\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Venders;$(SolutionDir)Venders\SDL\include;$(SolutionDir)Venders\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -136,6 +136,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="scr\main.cpp" />
+    <ClCompile Include="Venders\imgui\imgui.cpp" />
+    <ClCompile Include="Venders\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Venders\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Venders\imgui\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="Venders\imgui\imgui_impl_sdlrenderer3.cpp" />
+    <ClCompile Include="Venders\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Venders\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scr\header\animation.h" />
@@ -146,6 +153,20 @@
     <ClInclude Include="scr\header\scene.h" />
     <ClInclude Include="scr\header\utils.h" />
     <ClInclude Include="scr\header\window.h" />
+    <ClInclude Include="Venders\imgui\imconfig.h" />
+    <ClInclude Include="Venders\imgui\imgui.h" />
+    <ClInclude Include="Venders\imgui\ImGuiAF.h" />
+    <ClInclude Include="Venders\imgui\imgui_impl_sdl3.h" />
+    <ClInclude Include="Venders\imgui\imgui_impl_sdlrenderer3.h" />
+    <ClInclude Include="Venders\imgui\imgui_internal.h" />
+    <ClInclude Include="Venders\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Venders\imgui\imstb_textedit.h" />
+    <ClInclude Include="Venders\imgui\imstb_truetype.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Venders\imgui\.editorconfig" />
+    <None Include="Venders\imgui\.gitattributes" />
+    <None Include="Venders\imgui\.gitignore" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
