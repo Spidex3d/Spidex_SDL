@@ -2,8 +2,7 @@
 #include <SDL3/SDL.h>
 #include <vector>
 
-
-// This is my  scene.h for working with Backgrounds
+// This is my  scene.h for working with Backgrounds & Game textures
 
 const int BACKGROUND_WIDTH = 3600;
 const int BACKGROUND_HEIGHT = 720;
@@ -18,7 +17,6 @@ struct PlatformInfo {
     float width, height;
     
 };
-//PlatformInfo platforminfo = {10.0f, 580.0f, 64, 64};
 
 std::vector<PlatformInfo> platforminfo = {
     {10, 580, 64, 64},  // Example platform
@@ -32,19 +30,18 @@ struct ObjectInfo {
     float width, height;
 };
 std::vector<ObjectInfo> objectinfo = {
-    {10, 516, 64, 64},  // Example platform
+    {10, 516, 64, 64},  // Example Object
     {224, 452, 64, 64}
 };
 
-class BackGroundTexture {
+//class GameTexture {
+class GameTexture {
 public:
     static SDL_Texture* BackgrounTex;
     static SDL_Texture* MidlegroundTex;
     static SDL_Texture* GroundTex;
     static SDL_Texture* ObjectTexRock;
-
-    static SDL_Texture* PlatformTex;
-
+   // static SDL_Texture* PlatformTex;
     
     static bool InitializeTextures(SDL_Renderer* renderer) {
        
@@ -69,14 +66,9 @@ public:
             SDL_Log("Failed to load Ground texture: %s", SDL_GetError());
             return false;
         }
-        /*PlatformTex = IMG_LoadTexture(renderer, "assets/New_Pack/tile/2.png");
-        if (!PlatformTex) {
-            SDL_Log("Failed to load Platform texture: %s", SDL_GetError());
-            return false;
-        }*/
+        
         return true;
-        
-        
+                
     }
 
     static void CleanupTextures() {
@@ -100,29 +92,10 @@ public:
 private:
    
 };
-SDL_Texture* BackGroundTexture::BackgrounTex = nullptr;
-SDL_Texture* BackGroundTexture::MidlegroundTex = nullptr;
-SDL_Texture* BackGroundTexture::GroundTex = nullptr;
-SDL_Texture* BackGroundTexture::ObjectTexRock = nullptr;
-//SDL_Texture* BackGroundTexture::PlatformTex = nullptr;
+SDL_Texture* GameTexture::BackgrounTex = nullptr;
+SDL_Texture* GameTexture::MidlegroundTex = nullptr;
+SDL_Texture* GameTexture::GroundTex = nullptr;
+SDL_Texture* GameTexture::ObjectTexRock = nullptr;
+//SDL_Texture* GameTexture::PlatformTex = nullptr;
 
-//class Platforms {
-//public:
-//    static SDL_Texture* GroundTex;
-//    static SDL_Texture* PlatformTex;
-//
-//    static bool InitializeTextures(SDL_Renderer* renderer) {
-//        GroundTex = IMG_LoadTexture(renderer, "assets/New_Pack/background/pine1.png");
-//        if (!GroundTex) {
-//            SDL_Log("Failed to load Ground texture: %s", SDL_GetError());
-//            return false;
-//        }
-//        /*PlatformTex = IMG_LoadTexture(renderer, "assets/New_Pack/tile/2.png");
-//        if (!PlatformTex) {
-//            SDL_Log("Failed to load Platform texture: %s", SDL_GetError());
-//            return false;
-//        }*/
-//        return true;
-//    }
-//};
 

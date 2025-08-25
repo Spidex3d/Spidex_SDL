@@ -14,7 +14,7 @@
 #include "header\enemies.h"
 #include <iostream>
 
-// ##################################### Start here Platform Game ##########################################
+// ##################################### Start here Platformer Game ##########################################
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 
@@ -47,7 +47,6 @@ SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
         setWindowIcon(window, "icon.bmp"); // set the window icon must be a .bmp
 
        // Load the .wav file from wherever the app is being run from. 
-       // SDL_asprintf(&wav_path, "assets/sounds/helicopter_01.wav", SDL_GetBasePath());  /* allocate a string of the full file path */
         SDL_asprintf(&wav_path, "assets/sounds/helicopter_01.wav");  /* allocate a string of the full file path */
          
         if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
@@ -56,15 +55,13 @@ SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
         }
         SDL_free(wav_path);  // done with this string.
 
-        // Initialize textures NEW BackGroundTexture
-        if (!BackGroundTexture::InitializeTextures(renderer)) {
+        // Initialize textures NEW GameTexture
+        if (!GameTexture::InitializeTextures(renderer)) {
             SDL_Log("Failed to initialize textures");
             SDL_DestroyRenderer(renderer);
             SDL_DestroyWindow(window);
             SDL_Quit();
-
         }
-    
 
         // Create our audio stream in the same format as the .wav file. It'll convert to what the audio hardware wants. 
         stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
@@ -73,21 +70,10 @@ SDL_FRect camera1 = { 0, 0, SCR_WIDTH, SCR_HEIGHT };
             return SDL_APP_FAILURE;
         }
 
-       
-
-
         // SDL_OpenAudioDeviceStream starts the device paused. You have to tell it to start! 
         SDL_ResumeAudioStreamDevice(stream);
-
-        /* if (!Platforms::InitializeTextures(renderer)) {
-        SDL_Log("Failed to initialize textures");
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-
-        }*/
    
-         return SDL_APP_CONTINUE;
+        return SDL_APP_CONTINUE;
     }
 
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
@@ -97,6 +83,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;
     }    
+    if (Keyboard_state[SDL_SCANCODE_ESCAPE]) {  // Esc key to close window
+        return SDL_APP_SUCCESS;
+    }
     // Set Idle animation as defaul
         appState.animation_State = 1;
     // Check for specific key presses
@@ -111,7 +100,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             camera.x += 5.0f;
             camera1.x += 4.0f;
         }
-        if (isOnGround) {
+        if (player.isOnGround) {
             appState.animation_State = 2; // Set to Run only if on the ground
         }
         flip = SDL_FLIP_NONE; // No flipping when moving right
@@ -126,7 +115,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         else {
         player.x = 0.0f;
         }
-        if (isOnGround) {
+        if (player.isOnGround) {
             appState.animation_State = 2; // Set to Run only if on the ground
         }
         flip = SDL_FLIP_HORIZONTAL; // Flip for left movement
@@ -168,55 +157,22 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
                       
     }
     // Move the camera to the right for scrolling
-    //camera.x += 5.0f;
-
     // Ensure camera doesn't go out of bounds
     if (camera.x >= BACKGROUND_WIDTH - SCR_WIDTH) {
         camera.x = 0.0f;  // Loop the background
     }
-    //camera1.x += 4.0f;
-
+   
     // Ensure camera doesn't go out of bounds
     if (camera1.x >= BACKGROUND_WIDTH - SCR_WIDTH) {
         camera1.x = 0.0f;  // Loop the background
     }
-
         
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
-       // Background 
-    /*SDL_FRect background_position = { backpos.x, backpos.y, SCR_WIDTH, SCR_HEIGHT };
-    SDL_RenderTexture(renderer, BackGroundTexture::BackgrounTex, NULL, &background_position);
-    SDL_RenderTexture(renderer, BackGroundTexture::MidlegroundTex, NULL, &background_position);*/
+        // Render the camera & background
+    SDL_RenderTexture(renderer, GameTexture::BackgrounTex, &camera, nullptr);
+    SDL_RenderTexture(renderer, GameTexture::MidlegroundTex, &camera1, nullptr);
 
-    // Render the camera & background
-    SDL_RenderTexture(renderer, BackGroundTexture::BackgrounTex, &camera, nullptr);
-    SDL_RenderTexture(renderer, BackGroundTexture::MidlegroundTex, &camera1, nullptr);
-
-    //    // Floor
-    //for (const auto& platform : platforminfo) {
-    //    SDL_FRect rect = { static_cast<int>(platform.x), static_cast<int>(platform.y),
-    //                     static_cast<int>(platform.width), static_cast<int>(platform.height) };
-    //    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
-    //    //SDL_RenderFillRect(renderer, &rect);
-    //    SDL_RenderTexture(renderer, BackGroundTexture::GroundTex, NULL, &rect);
-    //}
-    //// objects Rocks
-    //for (const auto& object : objectinfo) {
-    //    SDL_FRect rect = { static_cast<int>(object.x), static_cast<int>(object.y),
-    //                     static_cast<int>(object.width), static_cast<int>(object.height) };
-    //    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
-    //    //SDL_RenderFillRect(renderer, &rect);
-    //    SDL_RenderTexture(renderer, BackGroundTexture::ObjectTexRock, NULL, &rect);
-    //}
-
-         
-     
-   // SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, 64.0f, 64.0f };
-   // SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, platforminfo.width, platforminfo.height};
-    //SDL_RenderTexture(renderer, BackGroundTexture::GroundTex, NULL, &platformFloor);
-        // Platforms
-        
         // Player
     SDL_FRect  playerSprite = { player.x, player.y, player.width, player.height };
     animation.animatePlayer(renderer, playerSprite, flip);
@@ -225,33 +181,15 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     for (const auto& platform : platforminfo) {
         SDL_FRect rect = { static_cast<int>(platform.x), static_cast<int>(platform.y),
                          static_cast<int>(platform.width), static_cast<int>(platform.height) };
-        SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
-        //SDL_RenderFillRect(renderer, &rect);
-        SDL_RenderTexture(renderer, BackGroundTexture::GroundTex, NULL, &rect);
+        SDL_RenderTexture(renderer, GameTexture::GroundTex, NULL, &rect);
     }
     // objects Rocks
     for (const auto& object : objectinfo) {
         SDL_FRect rect = { static_cast<int>(object.x), static_cast<int>(object.y),
                          static_cast<int>(object.width), static_cast<int>(object.height) };
-        SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
-        //SDL_RenderFillRect(renderer, &rect);
-        SDL_RenderTexture(renderer, BackGroundTexture::ObjectTexRock, NULL, &rect);
+        SDL_RenderTexture(renderer, GameTexture::ObjectTexRock, NULL, &rect);
     }
-
         // Collition     
-    //if (SDL_HasRectIntersectionFloat(&playerSprite, &platformFloor)) {
-    //    if (playerSprite.y + 79 <= platformFloor.y) {
-    //        // The player is landing on top of the platform
-    //        playerVelocity.y = platformFloor.y - playerSprite.h; // Adjust player position
-    //        playerVelocity.y = 0;
-    //        isOnGround = true; // player is on the ground
-    //    }
-    //    else {
-    //        isOnGround = false; //player is airborne 
-    //    }
-    //    std::cout << "Contact is " << isOnGround << std::endl;
-    //} 
-
     for (const auto& platform : platforminfo) {
         if (player.x + player.width > platform.x &&
             player.x < platform.x + platform.width &&
@@ -260,14 +198,16 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
             // Handle collision
             player.y = platform.y - player.height;  // Place player on top of the platform
             player.isOnGround = true;
+            std::cout << "Contact with floor  " << player.isOnGround << std::endl;
             break;
         }
         else {
             player.isOnGround = false;
+            std::cout << "No Contact with floor  " << player.isOnGround << std::endl;
         }
     }
     
-        //################################################ Enemies ################################################
+        //################################################ Enemie Helicopter ################################################
     std::string enemies_Type = "black"; // select the blck Helicopter
     std::string folderPath = "assets/helicopter/" + enemies_Type;   
     enemies_animation.loadEnemieAnimationFrames(folderPath);
@@ -302,8 +242,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     // Render with the updated position and flip state
     SDL_RenderTextureRotated(renderer, enemieTex, NULL, &enemie_sprite_position, 0, NULL, enemieflip);
     enemies_animation.animateEnemies(renderer, enemie_sprite_position, enemieflip);
- 
-    
+     
     SDL_RenderPresent(renderer);
     
     Uint32 endTime = SDL_GetTicks();
@@ -320,7 +259,7 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
 
     SDL_free(wav_data); // sound
-    BackGroundTexture::CleanupTextures();
+    GameTexture::CleanupTextures();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -332,3 +271,26 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 // ###################################### End ##########################################
 
 
+//    // Floor
+    //for (const auto& platform : platforminfo) {
+    //    SDL_FRect rect = { static_cast<int>(platform.x), static_cast<int>(platform.y),
+    //                     static_cast<int>(platform.width), static_cast<int>(platform.height) };
+    //    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
+    //    //SDL_RenderFillRect(renderer, &rect);
+    //    SDL_RenderTexture(renderer, GameTexture::GroundTex, NULL, &rect);
+    //}
+    //// objects Rocks
+    //for (const auto& object : objectinfo) {
+    //    SDL_FRect rect = { static_cast<int>(object.x), static_cast<int>(object.y),
+    //                     static_cast<int>(object.width), static_cast<int>(object.height) };
+    //    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);  // Brown color
+    //    //SDL_RenderFillRect(renderer, &rect);
+    //    SDL_RenderTexture(renderer, GameTexture::ObjectTexRock, NULL, &rect);
+    //}
+
+
+
+   // SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, 64.0f, 64.0f };
+   // SDL_FRect const platformFloor = { platforminfo.x, platforminfo.y, platforminfo.width, platforminfo.height};
+    //SDL_RenderTexture(renderer, GameTexture::GroundTex, NULL, &platformFloor);
+        // Platforms
