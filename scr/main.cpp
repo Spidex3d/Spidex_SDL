@@ -135,10 +135,10 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     Uint32 startTime = SDL_GetTicks();
     static int previous_State; // Keep track of the previous state
     // Sound
-    //if (SDL_GetAudioStreamQueued(stream) < (int)wav_data_len) {
-    //    /* feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data. */
-    //    SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
-    //}
+    if (SDL_GetAudioStreamQueued(stream) < (int)wav_data_len) {
+        /* feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data. */
+        SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
+    }
    
     handleJump(Keyboard_state);
  
